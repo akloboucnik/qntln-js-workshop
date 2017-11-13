@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 
-const initialState = { trades: [], err: '', msg: '' }
+const initialState = { trades: [], err: '', msg: '', filters: { buy: true, sell: true } }
 
 const gdaxTrades = (state = initialState, action) => {
     switch (action.type) {
@@ -18,6 +18,15 @@ const gdaxTrades = (state = initialState, action) => {
                 trades: [],
                 msg: null,
                 err: `Could not fetch ${action.payload.uri}`
+            }
+
+        case 'TOGGLE_SIDE_FILTER':
+            return {
+                ...state,
+                filters: {
+                    ...state.filters,
+                    [action.payload.side]: action.payload.show
+                }
             }
 
         default:

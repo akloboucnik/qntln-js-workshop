@@ -24,3 +24,10 @@ export const fetchTrades = () => {
         })
     }
 }
+
+export const toggleSideFilter = (side: 'buy'|'sell', show: boolean) => {
+    return {
+        type: 'TOGGLE_SIDE_FILTER',
+        payload: { side, show }
+    }
+}
