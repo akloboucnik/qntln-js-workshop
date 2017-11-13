@@ -1,14 +1,17 @@
+// @flow
 import 'bulma/css/bulma.css';
 import React, { Component } from 'react';
 
 import { Fetcher } from './components/Fetcher';
 
-class App extends Component {
+const DEFAULT_URL = 'http://httpbin.org/get'
+
+class App extends Component<*> {
   render() {
     return (
       <section className='section is-flex'>
           <div className='container'>
-            <Fetcher />
+            <Fetcher defaultUrl={DEFAULT_URL} />
           </div>
       </section>
     );
