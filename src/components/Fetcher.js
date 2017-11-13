@@ -1,43 +1,40 @@
 // @flow
 import React, { Component } from 'react'
+import { connect } from 'react-redux';
 
 import Trade from './Trade'
+import { fetchTrades } from '../actions'
 
+type TradeType = {
+    trade_id: number,
+    time: string,
+    price: string,
+    size: string,
+    side: 'sell'|'buy'
+}
 
 type Props = {
-    defaultUrl: string
-}
-
-type State = {
-    data: ?Object,
-    uri: ?string,
+    trades: Array<TradeType>,
     msg: ?string,
-    errMsg: ?string
+    err: ?string,
+    fetchTrades: Function
 }
 
-export class Fetcher extends Component<Props, State> {
+class Fetcher extends Component<Props> {
     interval: ?number;
 
     componentDidMount () {
-        const { defaultUrl } = this.props
-        this.fetchUri(defaultUrl)
-        this.interval = setInterval(() => this.fetchUri(defaultUrl), 1000)
+        const { fetchTrades } = this.props
+        fetchTrades();
+        this.interval = setInterval(fetchTrades, 1000)
     }
 
     componentWillUnmount () {
         this.interval && clearInterval(this.interval)
     }
 
-    fetchUri = (uri: string) => {
-        fetch(uri).then(r => r.ok ? r.json() : {}).then(data => {
-            this.setState({ data, msg: `Fetched ${uri} at ${(new Date()).toString()}!`, errMsg: null })
-        }).catch(e => {
-            this.setState({ data: null, msg: null, errMsg: `Could not fetch ${uri}` })
-        })
-    }
-
     render () {
-        const { data = null, msg, errMsg } = (this.state || {})
+        const { trades = null, msg, err } = (this.props || {})
         return (
             <div className='fetcher container'>
                 <div className='container'>
@@ -47,16 +44,21 @@ export class Fetcher extends Component<Props, State> {
                             {msg}
                         </div>
                     )}
-                    {errMsg && (
+                    {err && (
                         <div className='notification is-warning'>
-                            {errMsg}
+                            {err}
                         </div>
                     )}
                     <div className='container trades'>
-                        {data && data.slice(0, 10).map(props => <Trade {...props} />)}
+                        {trades && trades.slice(0, 10).map(props => <Trade {...props} />)}
                     </div>
                 </div>
             </div>
         )
     }
 }
+
+export default connect(
+    (state) => (state.gdax),
+    { fetchTrades }
+)(Fetcher);
