@@ -1,6 +1,8 @@
 // @flow
 import React, { Component } from 'react'
 
+import Trade from './Trade'
+
 
 type Props = {
     defaultUrl: string
@@ -14,14 +16,21 @@ type State = {
 }
 
 export class Fetcher extends Component<Props, State> {
+    interval: ?number;
+
     componentDidMount () {
         const { defaultUrl } = this.props
         this.fetchUri(defaultUrl)
+        this.interval = setInterval(() => this.fetchUri(defaultUrl), 1000)
+    }
+
+    componentWillUnmount () {
+        this.interval && clearInterval(this.interval)
     }
 
     fetchUri = (uri: string) => {
         fetch(uri).then(r => r.ok ? r.json() : {}).then(data => {
-            this.setState({ data, msg: `Fetched ${uri}!`, errMsg: null })
+            this.setState({ data, msg: `Fetched ${uri} at ${(new Date()).toString()}!`, errMsg: null })
         }).catch(e => {
             this.setState({ data: null, msg: null, errMsg: `Could not fetch ${uri}` })
         })
@@ -31,21 +40,10 @@ export class Fetcher extends Component<Props, State> {
         const { data = null, msg, errMsg } = (this.state || {})
         return (
             <div className='fetcher container'>
-                <div className='field'>
-                    <label className='label' htmlFor='uri'>URI</label>
-                    <div className='control'>
-                        <input className='input' type='text' id='uri' onChange={e => this.setState({ uri: e.target.value })}/>
-                    </div>
-                </div>
-                <div className='field'>
-                    <div className='control'>
-                        <input className='button' type='submit' value='Fetch!' onClick={(e) => this.state.uri && this.fetchUri(this.state.uri)}/>
-                    </div>
-                </div>
                 <div className='container'>
-                    <h1 className='subtitle'>Data</h1>
+                    <h1 className='subtitle'>Trades</h1>
                     {msg && (
-                        <div className='notification is-success'>
+                        <div className='notification'>
                             {msg}
                         </div>
                     )}
@@ -54,9 +52,9 @@ export class Fetcher extends Component<Props, State> {
                             {errMsg}
                         </div>
                     )}
-                    <pre>
-                        {JSON.stringify(data, null, 2)}
-                    </pre>
+                    <div className='container trades'>
+                        {data && data.slice(0, 10).map(props => <Trade {...props} />)}
+                    </div>
                 </div>
             </div>
         )
